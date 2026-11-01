@@ -83,6 +83,8 @@ Some notebook cells refer to Kaggle-specific input paths and generated intermedi
 - The third notebook explores time-step aggregates and linear regression; results require robust time-based validation and baseline comparison before being described as a reliable forecast.
 - Rolling balance peaks and drawdown definitions should be validated against the intended account-level time ordering and duplicate user-step records.
 
-## Author
+---
 
-Sai Datta Putta
+**Sai Datta Putta**
+
+[LinkedIn](https://www.linkedin.com/in/sai-datta-putta/)
