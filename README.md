@@ -1,188 +1,87 @@
-# Fintech System-Level Risk Monitoring & Forecasting Framework
+# System-Level Financial Risk Monitoring & Forecasting Framework
 
-## Executive Summary
+A notebook-based quantitative analysis using the PaySim mobile-money transaction dataset. The project moves from transaction-level data validation and user exposure feature construction to step-level risk-intensity analysis and exploratory forecasting of subsequent risk conditions.
 
-This project designs and implements a system-level risk monitoring and forecasting framework using fintech transaction data.  
-Instead of focusing on transaction-level fraud detection, the objective was to quantify systemic instability, model shock persistence, forecast next-step risk intensity, and translate predictive insights into operational monitoring policies.
+## Research Objective
 
-The final framework integrates signal engineering, autoregressive forecasting, shock half-life estimation, and a deployable risk monitoring blueprint.
+Explore whether transaction and account-balance behavior can be transformed into interpretable monitoring signals, and whether aggregated risk intensity contains information about future risk states.
 
----
+This is an analytical research project using a synthetic financial transaction simulator, not a deployed bank fraud-detection or market-risk system.
 
-## Business Problem
+## Data
 
-Traditional fraud detection models focus on classifying individual transactions. However, systemic instability often propagates across the ecosystem beyond isolated fraud events.
+The notebooks download the PaySim dataset through KaggleHub:
 
-This project reframes the problem:
+`ealaxi/paysim1`
 
-> Is the system becoming unstable?
+The source records include transaction type and amount, origin/destination account balances, time step, and fraud labels.
 
-The goal is to detect, quantify, and forecast systemic stress intensity rather than classify individual anomalies.
+## Research Pipeline
 
----
+### 1. Transaction Signal Engineering
 
-## Project Objectives
+Notebook: `01_system_risk_signal_engineering.ipynb`
 
-- Validate transaction-level balance integrity
-- Construct unified system-wide liquidity exposure signals
-- Engineer liquidity stress (drawdown) and fraud amplification features
-- Build a composite systemic Risk Index
-- Forecast next-step risk intensity using autoregressive modeling
-- Estimate systemic shock half-life
-- Translate modeling outputs into operational risk monitoring rules
+- Inspect transaction schema and data quality.
+- Check missing values, duplicates, non-negative monetary/balance fields, and balance consistency.
+- Compare balance inconsistencies with the fraud label.
+- Construct a unified user-time exposure view from origin and destination roles.
+- Derive rolling balance peaks and drawdown-style features for exploratory analysis.
 
----
+### 2. Risk Intensity Analysis
 
-## Data Architecture & Signal Engineering
+Notebook: `02_risk_intensity_forecasting_model.ipynb`
 
-### 1. Balance Validation
-- Verified origin and destination balance consistency
-- Identified structural noise
-- Prevented flawed signal assumptions
+- Load the derived development sample.
+- Examine drawdown-style measures and fraud rates.
+- Aggregate transaction count, high-drawdown rate, fraud rate, and average drawdown by simulation time step.
+- Construct a composite step-level risk index from normalized drawdown and fraud-rate components.
+- Export the resulting high-risk time-step table.
 
-### 2. Unified Exposure Modeling
-- Combined origin (negative) and destination (positive) flows
-- Built signed liquidity exposure dataset
-- Preserved strict chronological ordering
+### 3. Risk Persistence and Forecasting Exploration
 
-### 3. Liquidity Stress Quantification
-- Rolling drawdown relative to prior peaks
-- Fraud amplification rate
-- Drawdown amplification rate
+Notebook: `03_shock_decay_analysis_and_monitoring_framework.ipynb`
 
-### 4. Composite Risk Index
-Integrated amplification metrics into a system-level instability score.
+- Define elevated-risk states using a quantile-based threshold.
+- Explore transitions into elevated-risk states.
+- Build lagged risk-index features and examine next-step risk-index prediction using linear regression.
+- Calculate regression metrics and inspect post-peak risk decay.
 
----
+## Repository Contents
 
-## Structural Discovery
+```text
+.
+├── 01_system_risk_signal_engineering.ipynb
+├── 02_risk_intensity_forecasting_model.ipynb
+├── 03_shock_decay_analysis_and_monitoring_framework.ipynb
+├── .gitignore
+└── README.md
+```
 
-Exploratory analysis revealed:
+## Technology
 
-- High-risk regimes clustered early
-- No recurring regime transitions
-- Structural shock followed by stabilization
+Python · pandas · NumPy · scikit-learn · PyArrow · Jupyter Notebook · KaggleHub
 
-This invalidated transition classification modeling and led to a pivot toward continuous risk intensity forecasting.
+## Reproducing the Notebooks
 
----
+The notebooks were developed around Kaggle datasets/notebook inputs and intermediate Parquet/Pickle artifacts. To reproduce:
 
-## Modeling Approach
+1. Obtain access to the PaySim dataset through Kaggle.
+2. Install the required Python packages used in the notebooks.
+3. Run notebook 1 to construct the transaction/user-time features.
+4. Export or adapt the intermediate data paths expected by notebook 2.
+5. Run notebook 2 to create the step-level risk table.
+6. Supply the resulting risk table to notebook 3 and run the forecasting/decay analysis.
 
-### Baseline Model
-Linear Regression forecasting next-step risk intensity.
+Some notebook cells refer to Kaggle-specific input paths and generated intermediate artifacts that are not committed in this repository. Update those paths locally as needed.
 
-**Results:**
-- Test R² ≈ 0.84
-- RMSE ≈ 0.076
+## Important Methodological Notes
 
-Observation:
-Strong persistence but limited structural depth.
-
----
-
-### Enhanced Autoregressive Model (Multi-Lag)
-
-Added:
-- Lag1
-- Lag2
-- Lag3
-- Risk momentum
-- Transaction count
-
-**Results:**
-- Test R² ≈ 0.91
-- RMSE ≈ 0.057
-
-Key Insight:
-Systemic risk propagation follows a short-memory autoregressive decay process with significant momentum influence.
-
-Transaction volume impact was statistically negligible.
-
----
-
-## Shock Decay & Persistence Analysis
-
-Effective persistence weight ≈ 0.94
-
-Theoretical half-life ≈ 11 steps  
-Empirical half-life ≈ 16 steps  
-
-Interpretation:
-Structural clustering and delayed stabilization beyond simple exponential decay assumptions.
-
----
-
-## Operational Risk Monitoring Blueprint
-
-### Risk Classification Levels
-- Low Risk: Risk Index < 2
-- Moderate Risk: 2 ≤ Risk Index < 6
-- High Risk: Risk Index ≥ 6
-
-### Monitoring Window
-Maintain enhanced surveillance for 16 steps post shock.
-
-### Acceleration Alert
-Triggered when risk momentum exceeds threshold.
-
-### Deactivation Rule
-Risk Index < 2 for 3 consecutive steps.
-
----
-
-## Key Outcomes
-
-- Built a system-level risk index
-- Identified structural shock pattern
-- Achieved strong forecasting performance (R² ≈ 0.91)
-- Quantified systemic shock half-life
-- Designed deployable monitoring logic
-
----
-
-## Technology Stack
-
-- Python (Pandas, NumPy)
-- Scikit-learn (Linear Regression)
-- Time-Series Feature Engineering
-- Rolling Window Computation
-- Chronological Validation Strategy
-- Statistical Half-Life Estimation
-
----
-
-## Challenges & Strategic Learnings
-
-- Regime transition modeling invalidated due to zero transitions
-- Pivoted to continuous intensity forecasting
-- Learned to align modeling strategy with structural data properties
-- Validated assumptions before increasing model complexity
-
----
-
-## Strategic Value
-
-This project demonstrates:
-
-- System-level analytical thinking
-- Structural risk modeling
-- Autoregressive forecasting
-- Shock persistence quantification
-- Translation of predictive insights into operational decision frameworks
-
-It moves beyond predictive accuracy into decision intelligence.
-
----
-
-## Future Enhancements
-
-- Ridge regularization comparison
-- Non-linear model benchmarking (Random Forest / Gradient Boosting)
-- Real-time streaming adaptation
-- Deployment-ready alert pipeline
-
----
+- PaySim is simulated mobile-money data; findings may not generalize to real financial institutions.
+- The constructed composite risk index is an exploratory heuristic, not a validated regulatory or operational risk score.
+- The notebooks use fraud labels in parts of the risk-index construction and analysis. This creates target leakage if the index is interpreted as a fully unsupervised early-warning signal.
+- The third notebook explores time-step aggregates and linear regression; results require robust time-based validation and baseline comparison before being described as a reliable forecast.
+- Rolling balance peaks and drawdown definitions should be validated against the intended account-level time ordering and duplicate user-step records.
 
 ## Author
 
